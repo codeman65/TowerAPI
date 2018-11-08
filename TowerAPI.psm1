@@ -106,6 +106,27 @@ function Get-TowerHosts{
     }
 }
 
+function Get-TowerCredentials {
+    #Define parameters
+    Param (
+        [Parameter(Mandatory = $true)]
+        [string]$TowerURL
+    )
+
+    #Hard Set TLS 1.2
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
+    #Define ping endpoint to get Tower version
+    $CredentialURL = $TowerURL + "/api/v2/credentials/"
+    try {
+        Invoke-RestMethod -Uri $CredentialURL -Method Get -Headers $header -ContentType "application\json" -ErrorAction stop | Select-Object -ExpandProperty Results | Select-Object -Property * -ExcludeProperty related
+    }
+    catch {
+        Connect-AnsibleTower -TowerURL $TowerURL
+        Get-TowerCredentials -TowerURL $TowerURL
+    }
+}
+
 # Export only the functions using PowerShell standard verb-noun naming.
 # Be sure to list each exported functions in the FunctionsToExport field of the module manifest file.
 # This improves performance of command discovery in PowerShell.
