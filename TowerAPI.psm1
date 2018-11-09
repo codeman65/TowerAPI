@@ -32,11 +32,16 @@ function Connect-AnsibleTower {
     $Body = $AuthField | ConvertTo-Json
     $Type = "application/json"
 
-    #Login to Tower API
-    $TowerSessionRespon = Invoke-RestMethod -Uri $TowerSessionURL -Body $body -Method Post -ContentType $type
+    Try {
+        #Login to Tower API
+        $TowerSessionRespon = Invoke-RestMethod -Uri $TowerSessionURL -Body $body -Method Post -ContentType $type -ErrorAction Stop
 
-    #Create Authorization header
-    $header.Add("Authorization", "Bearer " + $TowerSessionRespon.token)
+        #Create Authorization header
+        $header.Add("Authorization", "Bearer " + $TowerSessionRespon.token)
+    }
+    catch {
+        Write-Host "Login failed, verify $towerurl and your credentials."
+    }
 }
 
 function Get-TowerInventory {
